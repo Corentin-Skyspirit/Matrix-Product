@@ -7,11 +7,14 @@ if [ -f "/usr/bin/ninja" ]; then
 fi
 
 # build
-cmake -B build $build_tool
+cmake -B build $build_tool -DKokkos_ENABLE_OPENMP=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build ./build --config Release || exit
 
 # run
-build/src/top.matrix_product 50 50 50 || exit
+export OMP_NUM_THREADS=$(lscpu -p | egrep -v '^#' | sort -u -t, -k 2,4 | wc -l)
+export OMP_PROC_BIND=true
+export OMP_PLACES=cores
+build/src/top.matrix_product 512 512 512  > out.json || exit
 
 # report
 python3 main.py || exit

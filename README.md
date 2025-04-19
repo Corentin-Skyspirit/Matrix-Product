@@ -25,3 +25,5 @@ export OMP_PROC_BIND=true
 export OMP_PLACES=cores
 ./build/src/top.matrix_product <M> <N> <K>
 ```
+
+You can also run the code with `sh ./run` command, it will compile, run and plot results automatically.
