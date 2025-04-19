@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cstdlib>
+#include <chrono>
 
 #include <Kokkos_Core.hpp>
 #include <fmt/core.h>
@@ -70,7 +71,13 @@ auto main(int argc, char* argv[]) -> int {
     matrix_init(C);
 
     Kokkos::fence();
+    auto start = std::chrono::high_resolution_clock::now();
+
     matrix_product(alpha, A, B, beta, C);
+
+    double duration = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - start).count();
+
+    fmt::println("time : {} ns", duration);
     Kokkos::fence();
   }
   Kokkos::finalize();

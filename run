@@ -1,0 +1,17 @@
+#!/usr/bin/bash
+
+# use ninja if installed
+build_tool=""
+if [ -f "/usr/bin/ninja" ]; then
+    build_tool="-G Ninja"
+fi
+
+# build
+cmake -B build $build_tool
+cmake --build ./build --config Release || exit
+
+# run
+build/src/top.matrix_product 50 50 50 || exit
+
+# report
+python3 main.py || exit
