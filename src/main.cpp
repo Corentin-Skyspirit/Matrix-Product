@@ -51,7 +51,7 @@ auto main(int argc, char* argv[]) -> int {
     fmt::print("Usage: {} <M> <N> <K>\n", argv[0]);
     return -1;
   }
-  fmt::println("{}", "{");
+
   int m = std::atoi(argv[1]);
   int n = std::atoi(argv[2]);
   int k = std::atoi(argv[3]);
@@ -79,10 +79,9 @@ auto main(int argc, char* argv[]) -> int {
     double duration = std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now() - start).count();
 
-    fmt::println("\"time\" : {},\n\"threads\" : {}", duration, Kokkos::num_threads());
+    fmt::println("{}, {}", Kokkos::num_threads(), duration);
     Kokkos::fence();
   }
   Kokkos::finalize();
-  fmt::println("{}","}");
   return 0;
 }

@@ -1,5 +1,9 @@
 #!/usr/bin/bash
 
+M=1000
+N=1000
+K=1000
+
 # use ninja if installed
 build_tool=""
 if [ -f "/usr/bin/ninja" ]; then
@@ -11,10 +15,17 @@ cmake -B build $build_tool -DKokkos_ENABLE_OPENMP=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build ./build --config Release || exit
 
 # run
-export OMP_NUM_THREADS=$(lscpu -p | egrep -v '^#' | sort -u -t, -k 2,4 | wc -l)
 export OMP_PROC_BIND=true
 export OMP_PLACES=cores
-build/src/top.matrix_product 512 512 512  > out.json || exit
+rm -f out.txt
+
+MAX_THREADS=$(lscpu -p | egrep -v '^#' | sort -u -t, -k 2,4 | wc -l)
+
+for i in $(seq 1 $MAX_THREADS)
+do
+    export OMP_NUM_THREADS=$i
+    build/src/top.matrix_product $M $N $K  >> out.txt
+done
 
 # report
-python3 main.py || exit
+python3 main.py $M $N $K || exit
