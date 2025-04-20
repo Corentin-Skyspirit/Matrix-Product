@@ -11,14 +11,15 @@ for ligne in f:
     nbCPU.append(int(parties[0]))
     duree.append(int(parties[1]))
 
-nbCPU=nbCPU[6:]
+nbCPU=nbCPU[:6]
 
 plt.figure(figsize=(8, 5))
-plt.plot(nbCPU, duree[:6], marker='o', linestyle='-', label='Layout Left')
-plt.plot(nbCPU, duree[6:], marker='o', linestyle='-', label='Layout Right')
+plt.plot(nbCPU, duree[:6], marker='o', linestyle='-', label='All Left')
+plt.plot(nbCPU, duree[6:12], marker='o', linestyle='-', label='All Right')
+plt.plot(nbCPU, duree[12:], marker='o', linestyle='-', label='A C Right - B Left')
 plt.xlabel("Nombre de coeurs")
 plt.ylabel("Temps (ns)")
-plt.title("Comparaison des layout left et right")
+plt.title("Comparaison de différents layouts")
 plt.grid(True)
 plt.tight_layout()
 plt.legend()
@@ -31,11 +32,12 @@ for d in duree:
     flops.append((2 * int(args[0]) * int(args[1]) * int(args[2])) / d)
 
 plt.figure(figsize=(8, 5))
-plt.plot(nbCPU, flops[:6], marker='o', linestyle='-', label='Layout Left')
-plt.plot(nbCPU, flops[6:], marker='o', linestyle='-', label='Layout Right')
+plt.plot(nbCPU, flops[:6], marker='o', linestyle='-', label='All Left')
+plt.plot(nbCPU, flops[6:12], marker='o', linestyle='-', label='All Right')
+plt.plot(nbCPU, flops[12:], marker='o', linestyle='-', label='A C Right - B Left')
 plt.xlabel("Nombre de coeurs")
 plt.ylabel("GFlops / s")
-plt.title("Comparaison des layout left et right")
+plt.title("Comparaison de différents layouts")
 plt.grid(True)
 plt.tight_layout()
 plt.legend()

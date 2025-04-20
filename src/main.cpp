@@ -5,7 +5,8 @@
 #include <Kokkos_Core.hpp>
 #include <fmt/core.h>
 
-using Matrix = Kokkos::View<double**, Kokkos::LayoutRight>;
+using MatrixL = Kokkos::View<double**, Kokkos::LayoutLeft>;
+using MatrixR = Kokkos::View<double**, Kokkos::LayoutRight>;
 
 template <class MatrixType>
 auto matrix_init(MatrixType& M) -> void {
@@ -61,9 +62,9 @@ auto main(int argc, char* argv[]) -> int {
 
   Kokkos::initialize(argc, argv);
   {
-    auto A = Matrix("A", m, k);
-    auto B = Matrix("B", k, n);
-    auto C = Matrix("C", m, n);
+    auto A = MatrixR("A", m, k);
+    auto B = MatrixL("B", k, n);
+    auto C = MatrixR("C", m, n);
 
     double alpha = drand48();
     matrix_init(A);
