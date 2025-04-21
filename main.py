@@ -5,7 +5,7 @@ import sys
 nbCPU = []
 duree = []
 
-leftright = "right"
+leftright = "RLR"
 
 f = open("out.txt", "r")
 for ligne in f:
