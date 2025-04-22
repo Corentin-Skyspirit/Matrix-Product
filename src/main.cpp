@@ -23,6 +23,7 @@ auto matrix_init(MatrixType& M) -> void {
   );
 }
 
+// Classic version
 template <class AMatrixType, class BMatrixType, class CMatrixType>
 auto matrix_product(double alpha, AMatrixType const& A, BMatrixType const& B, double beta, CMatrixType& C) -> void {
   static_assert(
@@ -47,6 +48,40 @@ auto matrix_product(double alpha, AMatrixType const& A, BMatrixType const& B, do
   );
 }
 
+
+// Cache blocked version
+template <class AMatrixType, class BMatrixType, class CMatrixType>
+auto matrix_product_cache_blocking(double alpha, const AMatrixType A, const BMatrixType B, double beta, CMatrixType C, int block_size) -> void {
+  static_assert(
+    AMatrixType::rank() == 2 && BMatrixType::rank() == 2 && CMatrixType::rank() == 2, "Views must be of rank 2"
+  );
+  assert(A.extent(0) == C.extent(0)); // M
+  assert(B.extent(1) == C.extent(1)); // N
+  assert(A.extent(1) == B.extent(0)); // K
+
+  Kokkos::parallel_for(
+    "dgemm_cache_blocked",
+    Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {A.extent(0), B.extent(1)}, {block_size, block_size}),
+    KOKKOS_LAMBDA(int i, int j) {
+      double acc = 0.0;
+      for (int kk = 0; kk < (int)A.extent(1); kk += block_size) {
+        int fin;
+        // calcul de fin de block
+        if (kk + block_size > (int)A.extent(1)) {
+          fin = A.extent(1);
+        }
+        else {
+          fin = kk + block_size;
+        }
+        for (int k = kk; k < fin; ++k) {
+          acc += alpha * A(i, k) * B(k, j);
+        }
+      }
+      C(i, j) *= beta + acc;
+    }
+  );
+}
+
 auto main(int argc, char* argv[]) -> int {
   if (argc < 4) {
     fmt::print("Usage: {} <M> <N> <K>\n", argv[0]);
@@ -65,23 +100,35 @@ auto main(int argc, char* argv[]) -> int {
     auto A = MatrixR("A", m, k);
     auto B = MatrixL("B", k, n);
     auto C = MatrixR("C", m, n);
+    auto C_blocked = MatrixR("C_blocked", m, n);
 
     double alpha = drand48();
     matrix_init(A);
     matrix_init(B);
     double beta = drand48();
     matrix_init(C);
+    matrix_init(C_blocked);
 
     Kokkos::fence();
     auto start = std::chrono::high_resolution_clock::now();
 
     matrix_product(alpha, A, B, beta, C);
 
-    double duration = std::chrono::duration_cast<std::chrono::nanoseconds>
+    double duration1 = std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now() - start).count();
 
-    fmt::println("{}, {}", Kokkos::num_threads(), duration);
     Kokkos::fence();
+
+    Kokkos::fence();
+    start = std::chrono::high_resolution_clock::now();
+
+    matrix_product_cache_blocking(alpha, A, B, beta, C_blocked, 16);
+
+    double duration2 = std::chrono::duration_cast<std::chrono::nanoseconds>
+      (std::chrono::high_resolution_clock::now() - start).count();
+
+    Kokkos::fence();
+    fmt::println("{}, {}, {}", Kokkos::num_threads(), duration1, duration2);
   }
   Kokkos::finalize();
   return 0;

@@ -28,4 +28,4 @@ do
 done
 
 # report
-python3 main.py $M $N $K || exit
+python3 main_comparaison.py $M $N $K || exit

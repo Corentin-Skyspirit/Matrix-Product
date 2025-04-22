@@ -2,29 +2,35 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-nbCPU = []
-duree = []
+nbCPU = 6
+duree = list(range(nbCPU * 2))
 
 f = open("out.txt", "r")
 for ligne in f:
     parties = ligne.strip().split(",")
-    nbCPU.append(int(parties[0]))
-    duree.append(int(parties[1]))
-
-nbCPU=nbCPU[:6]
+    cpt = int(parties[0]) - 1
+    duree[cpt] = int(parties[1])
+    duree[cpt + nbCPU] = int(parties[2])
+    # duree[cpt + nbCPU * 2] = int(parties[3])
+    # duree[cpt + nbCPU * 3] = int(parties[4])
+    # duree[cpt + nbCPU * 4] = int(parties[5])
+    # duree[cpt + nbCPU * 5] = int(parties[6])
 
 plt.figure(figsize=(8, 5))
-plt.plot(nbCPU, duree[:6], marker='o', linestyle='-', label='All Left')
-plt.plot(nbCPU, duree[6:12], marker='o', linestyle='-', label='All Right')
-plt.plot(nbCPU, duree[12:], marker='o', linestyle='-', label='A C Right - B Left')
+plt.plot(range(nbCPU), duree[:6], marker='o', linestyle='-', label='Classic version')
+plt.plot(range(nbCPU), duree[6:12], marker='o', linestyle='-', label='Cache blocked version (16)')
+# plt.plot(range(nbCPU), duree[12:18], marker='o', linestyle='-', label='Cache blocked version (32)')
+# plt.plot(range(nbCPU), duree[18:24], marker='o', linestyle='-', label='Cache blocked version (64)')
+# plt.plot(range(nbCPU), duree[24:30], marker='o', linestyle='-', label='Cache blocked version (128)')
+# plt.plot(range(nbCPU), duree[30:], marker='o', linestyle='-', label='Cache blocked version (256)')
 plt.xlabel("Nombre de coeurs")
 plt.ylabel("Temps (ns)")
-plt.title("Comparaison de différents layouts")
+plt.title("Temps d'exécution d'un version avec et sans cache blocking")
 plt.grid(True)
 plt.tight_layout()
 plt.legend()
 plt.ylim(bottom=0)
-plt.savefig("strong_scaling.png")
+plt.savefig("strong_scaling_cache_blocking.png")
 
 flops = []
 args = sys.argv[1:]
@@ -32,14 +38,17 @@ for d in duree:
     flops.append((2 * int(args[0]) * int(args[1]) * int(args[2])) / d)
 
 plt.figure(figsize=(8, 5))
-plt.plot(nbCPU, flops[:6], marker='o', linestyle='-', label='All Left')
-plt.plot(nbCPU, flops[6:12], marker='o', linestyle='-', label='All Right')
-plt.plot(nbCPU, flops[12:], marker='o', linestyle='-', label='A C Right - B Left')
+plt.plot(range(nbCPU), flops[:6], marker='o', linestyle='-', label='Classic version')
+plt.plot(range(nbCPU), flops[6:12], marker='o', linestyle='-', label='Cache blocked version (16)')
+# plt.plot(range(nbCPU), flops[12:18], marker='o', linestyle='-', label='Cache blocked version (32)')
+# plt.plot(range(nbCPU), flops[18:24], marker='o', linestyle='-', label='Cache blocked version (64)')
+# plt.plot(range(nbCPU), flops[24:30], marker='o', linestyle='-', label='Cache blocked version (128)')
+# plt.plot(range(nbCPU), flops[30:], marker='o', linestyle='-', label='Cache blocked version (256)')
 plt.xlabel("Nombre de coeurs")
 plt.ylabel("GFlops / s")
-plt.title("Comparaison de différents layouts")
+plt.title("GFlops / s d'une version en cache blocking et une sans")
 plt.grid(True)
 plt.tight_layout()
 plt.legend()
 plt.ylim(bottom=0)
-plt.savefig("strong_scaling_flops.png")
+plt.savefig("strong_scaling_flops_cache_blocking.png")
