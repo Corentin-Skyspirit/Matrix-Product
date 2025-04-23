@@ -126,7 +126,7 @@ auto main(int argc, char* argv[]) -> int {
     Kokkos::fence();
     start = std::chrono::high_resolution_clock::now();
 
-    matrix_product_cache_blocking(alpha, A, B, beta, C_blocked, 16);
+    matrix_product_cache_blocking(alpha, A, B, beta, C_blocked, 4);
 
     double duration2 = std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now() - start).count();
@@ -145,14 +145,13 @@ auto main(int argc, char* argv[]) -> int {
       }
     }
 
-
     // Testing on different sizes
 
     Kokkos::deep_copy(C_blocked, C);
     Kokkos::fence();
     start = std::chrono::high_resolution_clock::now();
 
-    matrix_product_cache_blocking(alpha, A, B, beta, C_blocked, 32);
+    matrix_product_cache_blocking(alpha, A, B, beta, C_blocked, 8);
 
     double duration3 = std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now() - start).count();
@@ -163,7 +162,7 @@ auto main(int argc, char* argv[]) -> int {
     Kokkos::fence();
     start = std::chrono::high_resolution_clock::now();
 
-    matrix_product_cache_blocking(alpha, A, B, beta, C_blocked, 64);
+    matrix_product_cache_blocking(alpha, A, B, beta, C_blocked, 16);
 
     double duration4 = std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now() - start).count();
@@ -174,7 +173,7 @@ auto main(int argc, char* argv[]) -> int {
     Kokkos::fence();
     start = std::chrono::high_resolution_clock::now();
 
-    matrix_product_cache_blocking(alpha, A, B, beta, C_blocked, 128);
+    matrix_product_cache_blocking(alpha, A, B, beta, C_blocked, 32);
 
     double duration5 = std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now() - start).count();
@@ -185,14 +184,25 @@ auto main(int argc, char* argv[]) -> int {
     Kokkos::fence();
     start = std::chrono::high_resolution_clock::now();
 
-    matrix_product_cache_blocking(alpha, A, B, beta, C_blocked, 256);
+    matrix_product_cache_blocking(alpha, A, B, beta, C_blocked, 64);
 
     double duration6 = std::chrono::duration_cast<std::chrono::nanoseconds>
       (std::chrono::high_resolution_clock::now() - start).count();
 
     Kokkos::fence();
 
-    fmt::println("{}, {}, {}, {}, {}, {}, {}, {}", Kokkos::num_threads(), duration1, duration2, duration3, duration4, duration5, duration6, diff);
+    Kokkos::deep_copy(C_blocked, C);
+    Kokkos::fence();
+    start = std::chrono::high_resolution_clock::now();
+
+    matrix_product_cache_blocking(alpha, A, B, beta, C_blocked, 128);
+
+    double duration7 = std::chrono::duration_cast<std::chrono::nanoseconds>
+      (std::chrono::high_resolution_clock::now() - start).count();
+
+    Kokkos::fence();
+
+    fmt::println("{}, {}, {}, {}, {}, {}, {}, {}, {}", Kokkos::num_threads(), duration1, duration2, duration3, duration4, duration5, duration6, duration7, diff);
   }
   Kokkos::finalize();
   return 0;
